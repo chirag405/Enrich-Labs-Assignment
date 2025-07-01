@@ -40,9 +40,9 @@ docker-compose up
 
 ### Postman Setup
 
-https://www.postman.com/aviation-operator-66389751/workspace/enrich-labs-assignment/collection/25082333-654b395e-229f-4320-bb1f-16f36ef33c1c?action=share&creator=25082333&active-environment=25082333-b9feaad5-d4b3-4d0a-bb2b-8036051d1a87
+[Postman Collection](https://www.postman.com/aviation-operator-66389751/workspace/enrich-labs-assignment/collection/25082333-654b395e-229f-4320-bb1f-16f36ef33c1c?action=share&creator=25082333&active-environment=25082333-b9feaad5-d4b3-4d0a-bb2b-8036051d1a87)
 
-          OR
+or
 
 1. Import `postman_collection.json` from project root
 2. Set environment variable `baseUrl` to `http://localhost:3000`
