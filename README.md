@@ -2,6 +2,10 @@
 
 A scalable job processing system integrating with multiple external data vendors, handling both synchronous and asynchronous processing patterns.
 
+## Contributors
+
+- chirag405 (chiragdhouni20@gmail.com)
+
 ## Quick Start
 
 ```bash
@@ -104,15 +108,6 @@ Run test with: `npm run load-test`
 | `/jobs`                   | GET    | List all jobs with pagination          | Query params: `page`, `limit`         | Array of job objects                                                             |
 | `/jobs/:request_id`       | GET    | Get status and results of specific job | -                                     | `{"request_id": string, "status": string, "data": object, "created_at": string}` |
 | `/vendor-webhook/:vendor` | POST   | Endpoint for async vendor callbacks    | Vendor-specific payload               | `{"success": boolean}`                                                           |
-
-### Status Codes
-
-- **200**: Success
-- **201**: Resource created
-- **400**: Bad request / Invalid input
-- **404**: Resource not found
-- **429**: Rate limit exceeded
-- **500**: Server error
 
 ## Additional Information
 
