@@ -1,0 +1,148 @@
+{
+  "info": {
+    "_postman_id": "e9c8e876-5bdf-4c8a-a6c3-f17d8c76d9f2",
+    "name": "Enrich Labs Assignment",
+    "description": "API collection for testing the Multi-Vendor Data Fetch Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Job",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"123\",\n  \"name\": \"  John Doe  \",\n  \"email\": \"john@example.com\",\n  \"phone\": \"555-123-4567\",\n  \"company\": \"TechCorp\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/jobs",
+          "host": ["{{baseUrl}}"],
+          "path": ["jobs"]
+        },
+        "description": "Create a new job with any JSON payload. Returns a request_id for tracking the job status."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Job Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/jobs/{{request_id}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["jobs", "{{request_id}}"]
+        },
+        "description": "Get the status and result of a specific job using its request_id."
+      },
+      "response": []
+    },
+    {
+      "name": "List Jobs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/jobs?status=complete&vendor=sync&page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["jobs"],
+          "query": [
+            {
+              "key": "status",
+              "value": "complete",
+              "description": "Filter by job status (pending, processing, complete, failed)"
+            },
+            {
+              "key": "vendor",
+              "value": "sync",
+              "description": "Filter by vendor type (sync, async)"
+            },
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Page number for pagination"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Number of items per page"
+            }
+          ]
+        },
+        "description": "List all jobs with optional filtering and pagination."
+      },
+      "response": []
+    },
+    {
+      "name": "Vendor Webhook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"request_id\": \"{{request_id}}\",\n  \"success\": true,\n  \"data\": {\n    \"processed_data\": {\n      \"name\": \"John Doe\",\n      \"company\": \"TechCorp\",\n      \"additional_info\": \"Added by async vendor\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/vendor-webhook/async-vendor",
+          "host": ["{{baseUrl}}"],
+          "path": ["vendor-webhook", "async-vendor"]
+        },
+        "description": "Webhook endpoint for receiving async vendor responses. Can be used to manually trigger job completion."
+      },
+      "response": []
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Health check endpoint to verify API and database connectivity."
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "request_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

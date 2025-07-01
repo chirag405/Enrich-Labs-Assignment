@@ -1,0 +1,143 @@
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: enrich_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: enrich_labs
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - enrich_network
+
+  # RabbitMQ Message Queue
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: enrich_rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - enrich_network
+
+  # MongoDB Web UI (like MongoDB Atlas)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: enrich_mongo_ui
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+    depends_on:
+      - mongodb
+    networks:
+      - enrich_network
+
+  # Main API Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: enrich_api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongodb:27017/enrich_labs
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - QUEUE_NAME=job_queue
+      - SYNC_VENDOR_URL=http://sync-vendor:3001
+      - ASYNC_VENDOR_URL=http://async-vendor:3002
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - enrich_network
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  # Background Worker
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: enrich_worker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/enrich_labs
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - QUEUE_NAME=job_queue
+      - SYNC_VENDOR_URL=http://sync-vendor:3001
+      - ASYNC_VENDOR_URL=http://async-vendor:3002
+      - API_BASE_URL=http://api:3000
+      - VENDOR_RATE_LIMIT_PER_SECOND=10
+      - VENDOR_RATE_LIMIT_BURST=20
+      - WORKER_CONCURRENCY=5
+      - WORKER_RETRY_ATTEMPTS=3
+      - WORKER_RETRY_DELAY_MS=1000
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - api
+    networks:
+      - enrich_network
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  # Synchronous Vendor Mock
+  sync-vendor:
+    build:
+      context: .
+      dockerfile: Dockerfile.sync-vendor
+    container_name: enrich_sync_vendor
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - VENDOR_TYPE=sync
+    networks:
+      - enrich_network
+
+  # Asynchronous Vendor Mock
+  async-vendor:
+    build:
+      context: .
+      dockerfile: Dockerfile.async-vendor
+    container_name: enrich_async_vendor
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - VENDOR_TYPE=async
+      - API_WEBHOOK_URL=http://api:3000/vendor-webhook/async-vendor
+    networks:
+      - enrich_network
+
+volumes:
+  mongodb_data:
+  rabbitmq_data:
+
+networks:
+  enrich_network:
+    driver: bridge
