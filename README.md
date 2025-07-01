@@ -2,10 +2,6 @@
 
 A scalable job processing system integrating with multiple external data vendors, handling both synchronous and asynchronous processing patterns.
 
-## Contributors
-
-- chirag405 (chiragdhouni20@gmail.com)
-
 ## Quick Start
 
 ```bash
